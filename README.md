@@ -1,0 +1,1 @@
+1. `${UNSPLASH_ROOT}/search/photos?query=${query}&client_id=${ACCESS_KEY}&per_page=100` to get photos

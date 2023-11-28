@@ -1,3 +1,4 @@
+import pandas as pd
 import torch
 from torchvision.datasets import VisionDataset
 from torchvision.io import ImageReadMode, read_image
@@ -11,8 +12,15 @@ from torchvision.transforms.v2 import (
     Resize
 )
 
-import pandas as pd
 from typing import Optional, Callable
+from transformers import CLIPProcessor
+
+
+DATA_ROOT = 'data'
+
+CLIP_CHECKPOINT = "openai/clip-vit-base-patch32"
+processor = CLIPProcessor.from_pretrained(CLIP_CHECKPOINT)
+tokenizer = processor.tokenizer
 
 
 def collate_fn(examples):
@@ -90,7 +98,11 @@ class ImageTextDataset(VisionDataset):
             self.image_paths.append(example["photo_id"])
 
     def _load_image(self, idx: int):
-        path = f"{self.root}/{self.image_paths[idx]}.jpg"
+        name = self.image_paths[idx]
+        if name.startswith("http://") or name.startswith("https://"):
+            path = name
+        else:
+            path = f"{self.root}/{name}.jpg"
         return read_image(path, mode=ImageReadMode.RGB)
 
     def _load_target(self, idx):
@@ -107,3 +119,16 @@ class ImageTextDataset(VisionDataset):
 
     def __len__(self) -> int:
         return len(self.captions)
+
+    
+class AvgMeter:
+    def __init__(self):
+        self.reset()
+    def reset(self):
+        self.avg, self.sum, self.count = 0, 0, 0
+    def update(self, val, count=1):
+        self.count += count
+        self.sum += val * count
+        self.avg = self.sum / self.count
+    def __repr__(self):
+        return f'{self.avg:.4f}'
