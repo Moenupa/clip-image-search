@@ -3,6 +3,7 @@ import requests
 from multiprocessing import Pool
 from PIL import Image
 from dotenv import dotenv_values
+import matplotlib.pyplot as plt
 
 
 config = dotenv_values(".env")
@@ -22,7 +23,7 @@ def parse_id(id: str):
     # e.g. https://unsplash.com/photos/Xh_yj0ZYKyA/download?force=true&w=360
     return Image.open(
         requests.get(
-            f'https://unsplash.com/photos/{id}/download?force=true&w=360', 
+            f'https://unsplash.com/photos/{id}/download?force=true&h=720', 
             stream=True
         ).raw
     )
@@ -43,3 +44,14 @@ def parse_query_to_ids(query: str, k: int = 3):
         json_dict = requests.get(url).json()
         ret += [e['id'] for e in json_dict['results']]
     return ret
+
+def gen_figure(images: list, title: str = None, k = 5):
+    # returns a plt figure
+    fig, axes = plt.subplots(max(k//4, 1), min(k, 4), figsize=(12, 4))
+    for image, ax in zip(images, axes.flatten()):
+        ax.imshow(image)
+        ax.axis("off")
+    if title:
+        fig.supxlabel(title)
+    fig.tight_layout()
+    return fig, axes

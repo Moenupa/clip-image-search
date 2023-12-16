@@ -1,3 +1,4 @@
+from datetime import datetime
 import pandas as pd
 import torch
 from torchvision.datasets import VisionDataset
@@ -17,6 +18,9 @@ from transformers import CLIPProcessor
 
 
 DATA_ROOT = 'data'
+MODEL_ROOT = 'out'
+LOG_ROOT = 'log'
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 CLIP_CHECKPOINT = "openai/clip-vit-base-patch32"
 processor = CLIPProcessor.from_pretrained(CLIP_CHECKPOINT)
@@ -52,7 +56,7 @@ class Transform(torch.nn.Module):
                 Resize(image_size),
                 CenterCrop(image_size),
                 ToDtype(torch.float32, scale=True),
-                Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                # Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -99,10 +103,7 @@ class ImageTextDataset(VisionDataset):
 
     def _load_image(self, idx: int):
         name = self.image_paths[idx]
-        if name.startswith("http://") or name.startswith("https://"):
-            path = name
-        else:
-            path = f"{self.root}/{name}.jpg"
+        path = f"{self.root}/{name}.jpg"
         return read_image(path, mode=ImageReadMode.RGB)
 
     def _load_target(self, idx):
@@ -123,12 +124,23 @@ class ImageTextDataset(VisionDataset):
     
 class AvgMeter:
     def __init__(self):
-        self.reset()
+        self.avg, self.sum, self.count = 0, 0, 0
+
     def reset(self):
         self.avg, self.sum, self.count = 0, 0, 0
+
     def update(self, val, count=1):
         self.count += count
         self.sum += val * count
         self.avg = self.sum / self.count
+
     def __repr__(self):
         return f'{self.avg:.4f}'
+
+
+def timestamp() -> str:
+    return datetime.now().strftime("%Y%m%d-%H%M%S")
+
+
+if __name__ == '__main__':
+    print(timestamp())
