@@ -66,8 +66,7 @@ def train(checkpoint: str = CLIP_CHECKPOINT, lr: float = 2e-6, num_epochs: int =
 
     eval_loader = DataLoader(
         ImageTextDataset(DATA_ROOT, "eval", transform=Transform(224, False)),
-        batch_size=batch_size,
-        shuffle=True,
+        batch_size=16,
         collate_fn=collate_fn
     )
     
@@ -82,6 +81,7 @@ def train(checkpoint: str = CLIP_CHECKPOINT, lr: float = 2e-6, num_epochs: int =
         train_loss = eval_epoch(model, train_loader)
         eval_loss = eval_epoch(model, eval_loader)
         logger.loc[-1] = [train_loss.avg, eval_loss.avg]
+        logger.to_csv(f'{dirname}/lr{lr}_b{batch_size}x{num_epochs}.csv', index=True)
 
     for epoch in range(num_epochs):
         model.train()
@@ -91,12 +91,12 @@ def train(checkpoint: str = CLIP_CHECKPOINT, lr: float = 2e-6, num_epochs: int =
         model.eval()
         with torch.no_grad():
             eval_loss = eval_epoch(model, eval_loader)
-            logger.loc[epoch] = [train_loss.avg, eval_loss.avg]
-
-    logger.to_csv(f'{dirname}/lr{lr}_b{batch_size}x{num_epochs}.csv', index=True)
+        
+        logger.loc[epoch] = [train_loss.avg, eval_loss.avg]
+        logger.to_csv(f'{dirname}/lr{lr}_b{batch_size}x{num_epochs}.csv', index=True)
 
 
 if __name__ == '__main__':
-    for lr in [2e-5, 5e-5, 1e-6, 2e-6]:
+    for lr in [1e-6, 2e-6, 5e-6]:
         for batch_size in [32, 64]:
             train(lr=lr, batch_size=batch_size)

@@ -11,6 +11,7 @@ from transformers import CLIPModel
 from utils import (
     Transform,
     ImageTextDataset,
+    load_model,
     collate_fn,
     timestamp,
     DEVICE,
@@ -43,13 +44,6 @@ def save_image_features(model, loader: DataLoader, path: str = "features_25k.npy
 
 
 def compute_features(model_name: str, report_score: bool = True) -> None:
-    if '/' not in model_name:
-        # fetch model locally
-        model_path = f'{MODEL_ROOT}/{model_name}'
-        assert os.path.exists(model_path), f'model path {model_path} does not exist'
-    else:
-        model_path = model_name
-
     valid_loader = DataLoader(
         ImageTextDataset('data', "valid", transform=Transform(224, False)),
         batch_size=1,
@@ -58,7 +52,7 @@ def compute_features(model_name: str, report_score: bool = True) -> None:
 
     dirname = f'{LOG_ROOT}/{timestamp()}'
     os.makedirs(dirname)
-    model = CLIPModel.from_pretrained(model_path).to(DEVICE)
+    model = load_model(model_name).to(DEVICE)
     save_image_features(model, valid_loader, f'{dirname}/{model_name}.npy')
     
     if report_score:
