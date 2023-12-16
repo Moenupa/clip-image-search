@@ -124,12 +124,16 @@ class ImageTextDataset(VisionDataset):
     
 class AvgMeter:
     def __init__(self):
-        self.avg, self.sum, self.count = 0, 0, 0
+        self.avg: float = 0.0
+        self.sum: float = 0.0
+        self.count: int = 0
 
     def reset(self):
-        self.avg, self.sum, self.count = 0, 0, 0
+        self.avg = 0.0
+        self.sum = 0.0
+        self.count = 0
 
-    def update(self, val, count=1):
+    def update(self, val: float, count: int = 1):
         self.count += count
         self.sum += val * count
         self.avg = self.sum / self.count

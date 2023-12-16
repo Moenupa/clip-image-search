@@ -77,6 +77,4 @@ if __name__ == '__main__':
     # print(collect_image_sizes().value_counts())
 
     # df = get_metadata()
-    # clip_model, clip_preprocess = clip.load("ViT-B/32", device="cpu")
-    # print("Input resolution:", clip_model.visual.input_resolution)
     partition()
