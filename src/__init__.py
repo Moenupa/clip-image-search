@@ -1,6 +1,6 @@
-from train import train
-from features import compute_features
-from utils import (
+from .train import train
+from .features import compute_features
+from .utils import (
     DATA_ROOT,
     MODEL_ROOT,
     LOG_ROOT,
@@ -18,7 +18,7 @@ from utils import (
     AvgMeter
 )
 
-from query import (
+from .query import (
     parse_id,
     parse_ids_to_images,
     parse_query_to_ids,

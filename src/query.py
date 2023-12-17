@@ -16,7 +16,7 @@ def parse_url(url: str):
     return Image.open(requests.get(url, stream=True).raw)
 
 def parse_urls_to_images(urls: list):
-    images = Pool(min(16, len(urls))).map(parse_url, urls)
+    images = Pool(16).map(parse_url, urls)
     return images
 
 
@@ -30,27 +30,27 @@ def parse_id(id: str):
     )
 
 def parse_ids_to_images(ids: list):
-    images = Pool(min(16, len(ids))).map(parse_id, ids)
+    images = Pool(16).map(parse_id, ids)
     return images
 
 
-def parse_query_to_ids(query: str, k: int = 3):
+def parse_query_to_ids(query: str, n: int = 3):
     """
-    retrieves [k * 30] ids from querying unsplash api
+    retrieves [n * 30] ids from querying unsplash api
     """
-    # r = requests.get(f'http://10.17.5.237/photos.json')
     ret = []
-    for i in range(k):
+    for i in range(n):
         url = f'{UNSPLASH_ROOT}/search/photos?query={query}&client_id={ACCESS_KEY}&page={i+1}&per_page=30'
         json_dict = requests.get(url).json()
         ret += [e['id'] for e in json_dict['results']]
     return ret
 
-def gen_figure(images: list, title: str = None, k = 5):
+
+def gen_figure(images: list, title: str = None, k: int = 4):
     # returns a plt figure
     fig, axes = plt.subplots(max(k//4, 1), min(k, 4), figsize=(12, 4))
-    ax: Axes = ax
     for image, ax in zip(images, axes.flatten()):
+        ax: Axes = ax
         ax.imshow(image)
         ax.axis("off")
     if title:

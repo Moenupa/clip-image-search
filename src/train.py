@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from torch.optim import AdamW
 
 from transformers import CLIPModel
-from utils import (
+from .utils import (
     Transform,
     ImageTextDataset,
     AvgMeter,
@@ -17,6 +17,7 @@ from utils import (
     CLIP_CHECKPOINT,
     DATA_ROOT,
     LOG_ROOT,
+    MODEL_ROOT,
     DEVICE
 )
 
@@ -83,11 +84,12 @@ def train(checkpoint: str = CLIP_CHECKPOINT, lr: float = 2e-6, num_epochs: int =
         logger.loc[-1] = [train_loss.avg, eval_loss.avg]
         logger.to_csv(f'{dirname}/lr{lr}_b{batch_size}x{num_epochs}.csv', index=True)
 
+    # os.makedirs(MODEL_ROOT, exist_ok=True)
     for epoch in range(num_epochs):
         model.train()
         train_loss = train_epoch(model, train_loader, optimizer)
 
-        model.save_pretrained(f'{dirname}/model{epoch}/')
+        model.save_pretrained(f'{dirname}/lr{lr}b{batch_size}x{epoch}/')
         model.eval()
         with torch.no_grad():
             eval_loss = eval_epoch(model, eval_loader)
